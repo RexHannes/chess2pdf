@@ -43,8 +43,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Browser runtime assets copied from npm packages by scripts/copy-runtime-assets.mjs
+/public/pdfjs/
+/public/tesseract/
+/public/tessdata/
+/public/stockfish/
+/public/ort/
+
 # Fenify ONNX model (large binary — generate with scripts/convert_fenify_to_onnx.py)
 /public/fenify/
-/public/ort/
 /scripts/fenify_cpu.pt
 .venv/
