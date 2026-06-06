@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "node scripts/copy-ort-assets.mjs",
+    "postinstall": "node scripts/copy-runtime-assets.mjs",
+    "predev": "node scripts/copy-runtime-assets.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/copy-runtime-assets.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

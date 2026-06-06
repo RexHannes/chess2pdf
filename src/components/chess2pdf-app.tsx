@@ -275,7 +275,7 @@ export function Chess2PdfApp() {
 
     const scannedCount = indices.length;
     const foundDiagramCount = newDiagrams.length;
-    const foundRecognizedBoardCount = newDiagrams.filter((diagram) => canPopulateBoard(diagram)).length;
+    const foundRecognizedBoardCount = newDiagrams.filter((diagram) => canLoadBoard(diagram)).length;
     const foundLineCount = newLines.filter((line) => line.sanMoves.length > 0).length;
     setProgress(
       foundRecognizedBoardCount > 0
@@ -381,14 +381,40 @@ export function Chess2PdfApp() {
       .sort((a, b) => b.confidence - a.confidence)[0];
   }
 
-  function canPopulateBoard(diagram: DetectedDiagram | null | undefined) {
+  function canLoadBoard(diagram: DetectedDiagram | null | undefined) {
     if (!diagram || !isValidFen(diagram.fen)) {
       return false;
     }
-    // Only auto-populate from the neural-network recogniser.
-    // Template / occupancy / fallback heuristics produce too many false
-    // positives on scanned books to be auto-applied to the board.
-    return diagram.recognitionSource === "fenify";
+    if (diagram.recognitionSource === "fenify") {
+      return true;
+    }
+    if (diagram.recognitionSource === "template") {
+      return diagram.confidence >= 0.5;
+    }
+    if (diagram.recognitionSource === "occupancy") {
+      return diagram.confidence >= 0.3;
+    }
+    return false;
+  }
+
+  function canAutoApplyBoard(diagram: DetectedDiagram | null | undefined) {
+    if (!diagram || !canLoadBoard(diagram)) {
+      return false;
+    }
+    return diagram.recognitionSource === "fenify" || diagram.confidence >= AUTO_APPLY_CONFIDENCE;
+  }
+
+  function boardLoadLabel(diagram: DetectedDiagram) {
+    if (!canLoadBoard(diagram)) {
+      return "Crop found, pieces not reliable";
+    }
+    if (diagram.recognitionSource === "fenify") {
+      return "Ready to load";
+    }
+    if (diagram.recognitionSource === "template") {
+      return "Template match, please verify";
+    }
+    return "Occupancy estimate, edit before analysis";
   }
 
   function clearBoardSelection(message: string) {
@@ -405,8 +431,8 @@ export function Chess2PdfApp() {
     options: { auto?: boolean; navigate?: boolean } = {},
   ) {
     const shouldNavigatePage = options.navigate ?? true;
-    const canApplyBoard = canPopulateBoard(diagram);
-    const shouldApplyBoard = canApplyBoard && (!options.auto || diagram.confidence >= AUTO_APPLY_CONFIDENCE);
+    const canApplyBoard = canLoadBoard(diagram);
+    const shouldApplyBoard = canApplyBoard && (!options.auto || canAutoApplyBoard(diagram));
     setSelectedDiagramId(diagram.id);
     if (shouldNavigatePage && diagram.pageIndex !== currentPage) {
       setCurrentPage(diagram.pageIndex);
@@ -732,7 +758,7 @@ export function Chess2PdfApp() {
     const diagram = diagrams.find((item) => item.id === line.diagramId);
     if (diagram) {
       setSelectedDiagramId(diagram.id);
-      if (canPopulateBoard(diagram)) {
+      if (canLoadBoard(diagram)) {
         const sourceFen = safeFen(diagram.fen);
         resetBoard(sourceFen, { loaded: true });
         void analyzePosition(sourceFen);
@@ -1042,9 +1068,9 @@ export function Chess2PdfApp() {
                   </button>
                   <button
                     className="rounded-md border border-line px-3 py-2 font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={!boardHasPosition && !canPopulateBoard(selectedDiagram)}
+                    disabled={!boardHasPosition && !canLoadBoard(selectedDiagram)}
                     onClick={() => {
-                      const sourceFen = selectedDiagram && canPopulateBoard(selectedDiagram) ? safeFen(selectedDiagram.fen) : fen;
+                      const sourceFen = selectedDiagram && canLoadBoard(selectedDiagram) ? safeFen(selectedDiagram.fen) : fen;
                       resetBoard(sourceFen, { loaded: sourceFen !== UNRECOGNIZED_FEN });
                       if (sourceFen !== UNRECOGNIZED_FEN) {
                         void analyzePosition(sourceFen);
@@ -1320,12 +1346,8 @@ export function Chess2PdfApp() {
                       <div>
                         <p className="font-semibold">Board {index + 1}</p>
                         <p className="text-sm text-muted">Page {diagram.pageIndex + 1}, confidence {Math.round(diagram.confidence * 100)} percent</p>
-                        <p className={`text-xs font-semibold ${canPopulateBoard(diagram) ? "text-accent" : "text-warn"}`}>
-                          {canPopulateBoard(diagram)
-                            ? diagram.recognitionSource === "fenify"
-                              ? "Ready to load"
-                              : "Template match, please verify"
-                            : "Crop found, pieces not reliable"}
+                        <p className={`text-xs font-semibold ${canLoadBoard(diagram) ? "text-accent" : "text-warn"}`}>
+                          {boardLoadLabel(diagram)}
                         </p>
                         {diagram.notes.map((note) => (
                           <p key={note} className="mt-1 text-xs text-warn">
