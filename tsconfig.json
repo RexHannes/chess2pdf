@@ -19,6 +19,7 @@
       }
     ],
     "paths": {
+      "@/lib/pdf-processing": ["./src/lib/pdf-processing-relaxed.ts"],
       "@/*": ["./src/*"]
     }
   },
