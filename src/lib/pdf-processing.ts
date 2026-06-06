@@ -217,7 +217,8 @@ export async function recognizeChessText(canvas: HTMLCanvasElement, bbox: BBox, 
   try {
     await worker.setParameters({
       tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
-      tessedit_char_whitelist: "0123456789abcdefghKQRBNOx+#=.- ",
+      tessedit_char_whitelist:
+        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ♔♕♖♗♘♙♚♛♜♝♞♟xXOo+#=.-–—…/ ",
       preserve_interword_spaces: "1",
     });
 

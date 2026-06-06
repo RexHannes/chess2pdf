@@ -13,7 +13,8 @@ const SAN_PATTERN = String.raw`[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?
 const LONG_ALGEBRAIC_PATTERN = String.raw`[a-h][1-8][-x]?[a-h][1-8][qrbnQRBN]?`;
 const TOKEN_PATTERN = new RegExp(`^(?:${CASTLE_PATTERN}|${LONG_ALGEBRAIC_PATTERN}|${SAN_PATTERN})$`);
 const INLINE_TOKEN_PATTERN = new RegExp(`${CASTLE_PATTERN}|${LONG_ALGEBRAIC_PATTERN}|${SAN_PATTERN}`, "g");
-const CHESSY_BUT_INVALID_PATTERN = /^(?:[KQRBNO][A-Za-z0-9+#=x-]*\d[A-Za-z0-9+#=x-]*|[a-h][x-]?[A-Za-z][1-8l][A-Za-z0-9+#=x-]*)$/;
+const CHESSY_BUT_INVALID_PATTERN =
+  /^(?:[KQRBNO][A-Za-z0-9+#=x-]*\d[A-Za-z0-9+#=x-]*|[a-h][x-]?[A-Za-z][1-8l][A-Za-z0-9+#=x-]*)$/;
 
 const FIGURINE_REPLACEMENTS: Array<[RegExp, string]> = [
   [/[♔♚]/g, "K"],
@@ -179,7 +180,7 @@ function canonicalizeMoveToken(token: string) {
     .replace(/[–—]/g, "-")
     .replace(/[×⨯✕X]/g, "x")
     .replace(/\s+/g, "")
-    .replace(/^([kqrbn])(?=[a-h1-8x])/u, (piece) => piece.toUpperCase())
+    .replace(/^([kqrbn])(?=[a-hx])/u, (piece) => piece.toUpperCase())
     .replace(/([a-h])l\b/gu, (_match, file: string) => `${file}1`)
     .replace(/=([qrbn])/giu, (_match, piece: string) => `=${piece.toUpperCase()}`);
 
