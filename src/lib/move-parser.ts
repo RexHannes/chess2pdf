@@ -1,4 +1,4 @@
-import { Chess } from "chess.js";
+import { Chess, type Square } from "chess.js";
 import { STARTING_FEN } from "@/lib/constants";
 
 const RESULT_PATTERN = /\b(?:1-0|0-1|1\/2-1\/2|\*)\b/g;
@@ -154,8 +154,8 @@ function playMoveToken(chess: Chess, token: string) {
 
   try {
     return chess.move({
-      from: longMove[1],
-      to: longMove[2],
+      from: longMove[1] as Square,
+      to: longMove[2] as Square,
       promotion: (longMove[3] ?? "q").toLowerCase(),
     });
   } catch {
