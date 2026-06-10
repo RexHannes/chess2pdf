@@ -130,7 +130,7 @@ if [[ -n "$LATEST_DEPLOY" ]]; then
   echo "  Redeploy triggered: $REDEPLOY"
 else
   echo "  Could not find latest deployment. Push any commit to GitHub to trigger a new deploy:"
-  echo "    cd /Users/puiyuenwong/PolymarketCorrelationStrategy/Chess2pdf"
+  echo "    cd /path/to/chess2pdf"
   echo "    git commit --allow-empty -m 'chore: trigger redeploy with model env' && git push"
 fi
 
